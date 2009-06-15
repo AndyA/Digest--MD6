@@ -1,5 +1,5 @@
-MD5_CTX*	T_MD5_CTX
+MD6_CTX*	T_MD6_CTX
 
 INPUT
-T_MD5_CTX
+T_MD6_CTX
 	$var = get_md5_ctx(aTHX_ $arg)

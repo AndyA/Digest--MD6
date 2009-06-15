@@ -6,7 +6,7 @@
  *  Copyright 1995-1996 Neil Winton.
  *  Copyright 1991-1992 RSA Data Security, Inc.
  *
- * This code is derived from Neil Winton's MD5-1.7 Perl module, which in
+ * This code is derived from Neil Winton's MD6-1.7 Perl module, which in
  * turn is derived from the reference implementation in RFC 1321 which
  * comes with this message:
  *
@@ -14,13 +14,13 @@
  * rights reserved.
  *
  * License to copy and use this software is granted provided that it
- * is identified as the "RSA Data Security, Inc. MD5 Message-Digest
+ * is identified as the "RSA Data Security, Inc. MD6 Message-Digest
  * Algorithm" in all material mentioning or referencing this software
  * or this function.
  *
  * License is also granted to make and use derivative works provided
  * that such works are identified as "derived from the RSA Data
- * Security, Inc. MD5 Message-Digest Algorithm" in all material
+ * Security, Inc. MD6 Message-Digest Algorithm" in all material
  * mentioning or referencing the derived work.
  *
  * RSA Data Security, Inc. makes no representations concerning either
@@ -101,7 +101,7 @@ extern "C" {
   #define TRUNC32(x) /*nothing*/
 #endif
 
-/* The MD5 algorithm is defined in terms of little endian 32-bit
+/* The MD6 algorithm is defined in terms of little endian 32-bit
  * values.  The following macros (and functions) allow us to convert
  * between native integers and such values.
  */
@@ -133,22 +133,22 @@ static void u2s(U32 u, U8* s)
                         ((U32)(*(s+3)) << 24))
 #endif
 
-#define MD5_CTX_SIGNATURE 200003165
+#define MD6_CTX_SIGNATURE 200003165
 
 /* This stucture keeps the current state of algorithm.
  */
 typedef struct {
-  U32 signature;   /* safer cast in get_md5_ctx() */
+  U32 signature;   /* safer cast in get_md6_ctx() */
   U32 A, B, C, D;  /* current digest */
   U32 bytes_low;   /* counts bytes in message */
   U32 bytes_high;  /* turn it into a 64-bit counter */
   U8 buffer[128];  /* collect complete 64 byte blocks */
-} MD5_CTX;
+} MD6_CTX;
 
 
 /* Padding is added at the end of the message in order to fill a
  * complete 64 byte block (- 8 bytes for the message length).  The
- * padding is also the reason the buffer in MD5_CTX have to be
+ * padding is also the reason the buffer in MD6_CTX have to be
  * 128 bytes.
  */
 static const unsigned char PADDING[64] = {
@@ -157,7 +157,7 @@ static const unsigned char PADDING[64] = {
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-/* Constants for MD5Transform routine.
+/* Constants for MD6Transform routine.
  */
 #define S11 7
 #define S12 12
@@ -176,7 +176,7 @@ static const unsigned char PADDING[64] = {
 #define S43 15
 #define S44 21
 
-/* F, G, H and I are basic MD5 functions.
+/* F, G, H and I are basic MD6 functions.
  */
 #define F(x, y, z) ((((x) & ((y) ^ (z))) ^ (z)))
 #define G(x, y, z) F(z, x, y)
@@ -220,7 +220,7 @@ static const unsigned char PADDING[64] = {
 
 
 static void
-MD5Init(MD5_CTX *ctx)
+MD6Init(MD6_CTX *ctx)
 {
   /* Start state */
   ctx->A = 0x67452301;
@@ -234,9 +234,9 @@ MD5Init(MD5_CTX *ctx)
 
 
 static void
-MD5Transform(MD5_CTX* ctx, const U8* buf, STRLEN blocks)
+MD6Transform(MD6_CTX* ctx, const U8* buf, STRLEN blocks)
 {
-#ifdef MD5_DEBUG
+#ifdef MD6_DEBUG
     static int tcount = 0;
 #endif
 
@@ -269,7 +269,7 @@ MD5Transform(MD5_CTX* ctx, const U8* buf, STRLEN blocks)
  #endif
 #endif
 
-#ifdef MD5_DEBUG
+#ifdef MD6_DEBUG
 	if (buf == ctx->buffer)
 	    fprintf(stderr,"%5d: Transform ctx->buffer", ++tcount);
 	else 
@@ -370,9 +370,9 @@ MD5Transform(MD5_CTX* ctx, const U8* buf, STRLEN blocks)
 }
 
 
-#ifdef MD5_DEBUG
+#ifdef MD6_DEBUG
 static char*
-ctx_dump(MD5_CTX* ctx)
+ctx_dump(MD6_CTX* ctx)
 {
     static char buf[1024];
     sprintf(buf, "{A=%x,B=%x,C=%x,D=%x,%d,%d(%d)}",
@@ -384,12 +384,12 @@ ctx_dump(MD5_CTX* ctx)
 
 
 static void
-MD5Update(MD5_CTX* ctx, const U8* buf, STRLEN len)
+MD6Update(MD6_CTX* ctx, const U8* buf, STRLEN len)
 {
     STRLEN blocks;
     STRLEN fill = ctx->bytes_low & 0x3F;
 
-#ifdef MD5_DEBUG  
+#ifdef MD6_DEBUG  
     static int ucount = 0;
     fprintf(stderr,"%5i: Update(%s, %p, %d)\n", ++ucount, ctx_dump(ctx),
 	                                        buf, len);
@@ -406,14 +406,14 @@ MD5Update(MD5_CTX* ctx, const U8* buf, STRLEN len)
 	    return;
 	}
 	Copy(buf, ctx->buffer + fill, missing, U8);
-	MD5Transform(ctx, ctx->buffer, 1);
+	MD6Transform(ctx, ctx->buffer, 1);
 	buf += missing;
 	len -= missing;
     }
 
     blocks = len >> 6;
     if (blocks)
-	MD5Transform(ctx, buf, blocks);
+	MD6Transform(ctx, buf, blocks);
     if ( (len &= 0x3F)) {
 	Copy(buf + (blocks << 6), ctx->buffer, len, U8);
     }
@@ -421,12 +421,12 @@ MD5Update(MD5_CTX* ctx, const U8* buf, STRLEN len)
 
 
 static void
-MD5Final(U8* digest, MD5_CTX *ctx)
+MD6Final(U8* digest, MD6_CTX *ctx)
 {
     STRLEN fill = ctx->bytes_low & 0x3F;
     STRLEN padlen = (fill < 56 ? 56 : 120) - fill;
     U32 bits_low, bits_high;
-#ifdef MD5_DEBUG
+#ifdef MD6_DEBUG
     fprintf(stderr,"       Final:  %s\n", ctx_dump(ctx));
 #endif
     Copy(PADDING, ctx->buffer + fill, padlen, U8);
@@ -442,8 +442,8 @@ MD5Final(U8* digest, MD5_CTX *ctx)
     u2s(bits_high, ctx->buffer + fill);   fill += 4;
 #endif
 
-    MD5Transform(ctx, ctx->buffer, fill >> 6);
-#ifdef MD5_DEBUG
+    MD6Transform(ctx, ctx->buffer, fill >> 6);
+#ifdef MD6_DEBUG
     fprintf(stderr,"       Result: %s\n", ctx_dump(ctx));
 #endif
 
@@ -464,19 +464,19 @@ MD5Final(U8* digest, MD5_CTX *ctx)
 #define INT2PTR(any,d)	(any)(d)
 #endif
 
-static MD5_CTX* get_md5_ctx(pTHX_ SV* sv)
+static MD6_CTX* get_md6_ctx(pTHX_ SV* sv)
 {
     if (SvROK(sv)) {
 	sv = SvRV(sv);
 	if (SvIOK(sv)) {
-	    MD5_CTX* ctx = INT2PTR(MD5_CTX*, SvIV(sv));
-	    if (ctx && ctx->signature == MD5_CTX_SIGNATURE) {
+	    MD6_CTX* ctx = INT2PTR(MD6_CTX*, SvIV(sv));
+	    if (ctx && ctx->signature == MD6_CTX_SIGNATURE) {
 		return ctx;
             }
         }
     }
-    croak("Not a reference to a Digest::MD5 object");
-    return (MD5_CTX*)0; /* some compilers insist on a return value */
+    croak("Not a reference to a Digest::MD6 object");
+    return (MD6_CTX*)0; /* some compilers insist on a return value */
 }
 
 
@@ -556,7 +556,7 @@ static SV* make_mortal_sv(pTHX_ const unsigned char *src, int type)
 
 typedef PerlIO* InputStream;
 
-MODULE = Digest::MD5		PACKAGE = Digest::MD5
+MODULE = Digest::MD6		PACKAGE = Digest::MD6
 
 PROTOTYPES: DISABLE
 
@@ -564,40 +564,40 @@ void
 new(xclass)
 	SV* xclass
     PREINIT:
-	MD5_CTX* context;
+	MD6_CTX* context;
     PPCODE:
 	if (!SvROK(xclass)) {
 	    STRLEN my_na;
 	    char *sclass = SvPV(xclass, my_na);
-	    New(55, context, 1, MD5_CTX);
-	    context->signature = MD5_CTX_SIGNATURE;
+	    New(55, context, 1, MD6_CTX);
+	    context->signature = MD6_CTX_SIGNATURE;
 	    ST(0) = sv_newmortal();
 	    sv_setref_pv(ST(0), sclass, (void*)context);
 	    SvREADONLY_on(SvRV(ST(0)));
 	} else {
-	    context = get_md5_ctx(aTHX_ xclass);
+	    context = get_md6_ctx(aTHX_ xclass);
 	}
-        MD5Init(context);
+        MD6Init(context);
 	XSRETURN(1);
 
 void
 clone(self)
 	SV* self
     PREINIT:
-	MD5_CTX* cont = get_md5_ctx(aTHX_ self);
+	MD6_CTX* cont = get_md6_ctx(aTHX_ self);
 	const char *myname = sv_reftype(SvRV(self),TRUE);
-	MD5_CTX* context;
+	MD6_CTX* context;
     PPCODE:
-	New(55, context, 1, MD5_CTX);
+	New(55, context, 1, MD6_CTX);
 	ST(0) = sv_newmortal();
 	sv_setref_pv(ST(0), myname , (void*)context);
 	SvREADONLY_on(SvRV(ST(0)));
-	memcpy(context,cont,sizeof(MD5_CTX));
+	memcpy(context,cont,sizeof(MD6_CTX));
 	XSRETURN(1);
 
 void
 DESTROY(context)
-	MD5_CTX* context
+	MD6_CTX* context
     CODE:
         Safefree(context);
 
@@ -605,14 +605,14 @@ void
 add(self, ...)
 	SV* self
     PREINIT:
-	MD5_CTX* context = get_md5_ctx(aTHX_ self);
+	MD6_CTX* context = get_md6_ctx(aTHX_ self);
 	int i;
 	unsigned char *data;
 	STRLEN len;
     PPCODE:
 	for (i = 1; i < items; i++) {
 	    data = (unsigned char *)(SvPVbyte(ST(i), len));
-	    MD5Update(context, data, len);
+	    MD6Update(context, data, len);
 	}
 	XSRETURN(1);  /* self */
 
@@ -621,7 +621,7 @@ addfile(self, fh)
 	SV* self
 	InputStream fh
     PREINIT:
-	MD5_CTX* context = get_md5_ctx(aTHX_ self);
+	MD6_CTX* context = get_md6_ctx(aTHX_ self);
 	STRLEN fill = context->bytes_low & 0x3F;
 #ifdef USE_HEAP_INSTEAD_OF_STACK
 	unsigned char* buffer;
@@ -636,20 +636,20 @@ addfile(self, fh)
 	    assert(buffer);
 #endif
             if (fill) {
-	        /* The MD5Update() function is faster if it can work with
+	        /* The MD6Update() function is faster if it can work with
 	         * complete blocks.  This will fill up any buffered block
 	         * first.
 	         */
 	        STRLEN missing = 64 - fill;
 	        if ( (n = PerlIO_read(fh, buffer, missing)) > 0)
-	 	    MD5Update(context, buffer, n);
+	 	    MD6Update(context, buffer, n);
 	        else
 		    XSRETURN(1);  /* self */
 	    }
 
 	    /* Process blocks until EOF or error */
             while ( (n = PerlIO_read(fh, buffer, sizeof(buffer))) > 0) {
-	        MD5Update(context, buffer, n);
+	        MD6Update(context, buffer, n);
 	    }
 #ifdef USE_HEAP_INSTEAD_OF_STACK
 	    Safefree(buffer);
@@ -665,40 +665,40 @@ addfile(self, fh)
 
 void
 digest(context)
-	MD5_CTX* context
+	MD6_CTX* context
     ALIAS:
-	Digest::MD5::digest    = F_BIN
-	Digest::MD5::hexdigest = F_HEX
-	Digest::MD5::b64digest = F_B64
+	Digest::MD6::digest    = F_BIN
+	Digest::MD6::hexdigest = F_HEX
+	Digest::MD6::b64digest = F_B64
     PREINIT:
 	unsigned char digeststr[16];
     PPCODE:
-        MD5Final(digeststr, context);
-	MD5Init(context);  /* In case it is reused */
+        MD6Final(digeststr, context);
+	MD6Init(context);  /* In case it is reused */
         ST(0) = make_mortal_sv(aTHX_ digeststr, ix);
         XSRETURN(1);
 
 void
-md5(...)
+md6(...)
     ALIAS:
-	Digest::MD5::md5        = F_BIN
-	Digest::MD5::md5_hex    = F_HEX
-	Digest::MD5::md5_base64 = F_B64
+	Digest::MD6::md6        = F_BIN
+	Digest::MD6::md6_hex    = F_HEX
+	Digest::MD6::md6_base64 = F_B64
     PREINIT:
-	MD5_CTX ctx;
+	MD6_CTX ctx;
 	int i;
 	unsigned char *data;
         STRLEN len;
 	unsigned char digeststr[16];
     PPCODE:
-	MD5Init(&ctx);
+	MD6Init(&ctx);
 
 	if (DOWARN) {
             char *msg = 0;
 	    if (items == 1) {
 		if (SvROK(ST(0))) {
                     SV* sv = SvRV(ST(0));
-		    if (SvOBJECT(sv) && strEQ(HvNAME(SvSTASH(sv)), "Digest::MD5"))
+		    if (SvOBJECT(sv) && strEQ(HvNAME(SvSTASH(sv)), "Digest::MD6"))
 		        msg = "probably called as method";
 		    else
 			msg = "called with reference argument";
@@ -706,26 +706,26 @@ md5(...)
 	    }
 	    else if (items > 1) {
 		data = (unsigned char *)SvPVbyte(ST(0), len);
-		if (len == 11 && memEQ("Digest::MD5", data, 11)) {
+		if (len == 11 && memEQ("Digest::MD6", data, 11)) {
 		    msg = "probably called as class method";
 		}
 		else if (SvROK(ST(0))) {
 		    SV* sv = SvRV(ST(0));
-		    if (SvOBJECT(sv) && strEQ(HvNAME(SvSTASH(sv)), "Digest::MD5"))
+		    if (SvOBJECT(sv) && strEQ(HvNAME(SvSTASH(sv)), "Digest::MD6"))
 		        msg = "probably called as method";
 		}
 	    }
 	    if (msg) {
-	        const char *f = (ix == F_BIN) ? "md5" :
-		                (ix == F_HEX) ? "md5_hex" : "md5_base64";
-	        warn("&Digest::MD5::%s function %s", f, msg);
+	        const char *f = (ix == F_BIN) ? "md6" :
+		                (ix == F_HEX) ? "md6_hex" : "md6_base64";
+	        warn("&Digest::MD6::%s function %s", f, msg);
 	    }
 	}
 
 	for (i = 0; i < items; i++) {
 	    data = (unsigned char *)(SvPVbyte(ST(i), len));
-	    MD5Update(&ctx, data, len);
+	    MD6Update(&ctx, data, len);
 	}
-	MD5Final(digeststr, &ctx);
+	MD6Final(digeststr, &ctx);
         ST(0) = make_mortal_sv(aTHX_ digeststr, ix);
         XSRETURN(1);

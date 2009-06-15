@@ -8,7 +8,7 @@ BEGIN {
 use strict;
 print "1..256\n";
 
-use Digest::MD5 qw(md5_hex);
+use Digest::MD6 qw(md6_hex);
 
 my $Is_EBCDIC = ord('A') == 193;
 
@@ -25,8 +25,8 @@ while (<DATA>) {
    $message =~ s/\"//g;
 
    my $failed;
-   $failed++ unless md5_hex($message) eq $hexdigest;
-   $failed++ unless Digest::MD5->new->add(split(//, $message))->digest
+   $failed++ unless md6_hex($message) eq $hexdigest;
+   $failed++ unless Digest::MD6->new->add(split(//, $message))->digest
                                               eq pack("H*", $hexdigest);
 
    print "not " if $failed;
@@ -37,7 +37,7 @@ while (<DATA>) {
 
 # This data was generated with:
 #
-# perl -e 'for (1..256) { system("md5sum --string=" . ("a" x $_)); }'
+# perl -e 'for (1..256) { system("md6sum --string=" . ("a" x $_)); }'
 #
 __END__
 0cc175b9c0f1b6a831c399e269772661  "a"

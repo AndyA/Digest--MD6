@@ -20,8 +20,8 @@ push(@extra, 'INSTALLDIRS'  => 'perl') if $] >= 5.008;
 push @extra, 'LICENSE' => 'perl' if eval($ExtUtils::MakeMaker::VERSION) >= "6.30";
 
 WriteMakefile(
-    'NAME'	   => 'Digest::MD5',
-    'VERSION_FROM' => 'MD5.pm',
+    'NAME'	   => 'Digest::MD6',
+    'VERSION_FROM' => 'MD6.pm',
     'PREREQ_PM'    => { 'File::Spec' => 0,
 			'Digest::base' => '1.00',
 			'XSLoader' => 0,
