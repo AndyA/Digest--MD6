@@ -55,19 +55,73 @@ extern "C" {
 #ifndef INT2PTR
 #define INT2PTR(any,d)	(any)(d)
 #endif
+static const char *
+md6_error( int error ) {
+  switch ( error ) {
+  case MD6_SUCCESS:
+    return "no error";
+  case MD6_FAIL:
+    return "some other problem";
+  case MD6_BADHASHLEN:
+    return "hashbitlen<1 or >512 bits";
+  case MD6_NULLSTATE:
+    return "null state passed to MD6";
+  case MD6_BADKEYLEN:
+    return "key length is <0 or >512 bits";
+  case MD6_STATENOTINIT:
+    return "state was never initialized";
+  case MD6_STACKUNDERFLOW:
+    return "MD6 stack underflows (shouldn't happen)";
+  case MD6_STACKOVERFLOW:
+    return "MD6 stack overflow (message too long)";
+  case MD6_NULLDATA:
+    return "null data pointer";
+  case MD6_NULL_N:
+    return "compress: N is null";
+  case MD6_NULL_B:
+    return "standard compress: null B pointer";
+  case MD6_BAD_ELL:
+    return "standard compress: ell not in {0,255}";
+  case MD6_BAD_p:
+    return "standard compress: p<0 or p>b*w";
+  case MD6_NULL_K:
+    return "standard compress: K is null";
+  case MD6_NULL_Q:
+    return "standard compress: Q is null";
+  case MD6_NULL_C:
+    return "standard compress: C is null";
+  case MD6_BAD_L:
+    return "standard compress: L <0 or > 255";
+  case MD6_BAD_r:
+    return "compress: r<0 or r>255";
+  case MD6_OUT_OF_MEMORY:
+    return "compress: storage allocation failed";
+  default:
+    return "unknown error";
+  }
+}
+
 static void
-MD6Init( md6_state * ctx ) {
-  md6_init( ctx, 256 );
+md6_croak( int error ) {
+  if ( MD6_SUCCESS != error ) {
+    croak( md6_error( error ) );
+  }
+}
+
+static void
+MD6Init( md6_state * ctx, int d ) {
+  md6_croak( md6_init( ctx, d ) ); 
+  /*md6_croak( md6_full_init( ctx, d, "", 0, 64, 5 ) );*/
 }
 
 static void
 MD6Update( md6_state * ctx, const U8 * buf, STRLEN len ) {
-  md6_update( ctx, buf, len * 8 );
+  md6_croak( md6_update( ctx, buf, len * 8 ) );
 }
 
 static void
 MD6Final( U8 * digest, md6_state * ctx ) {
-  md6_final( ctx, digest );
+  md6_croak( md6_final( ctx, digest ) );
 }
 
 static md6_state *
@@ -87,9 +141,9 @@ get_md6_ctx( pTHX_ SV * sv ) {
 }
 
 static char *
-hex_16( const unsigned char *from, char *to ) {
+hex_16( const unsigned char *from, char *to, STRLEN len ) {
   static const char hexdigits[] = "0123456789abcdef";
-  const unsigned char *end = from + 16;
+  const unsigned char *end = from + len;
   char *d = to;
 
   while ( from < end ) {
@@ -102,10 +156,10 @@ hex_16( const unsigned char *from, char *to ) {
 }
 
 static char *
-base64_16( const unsigned char *from, char *to ) {
+base64_16( const unsigned char *from, char *to, STRLEN len ) {
   static const char base64[] =
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-  const unsigned char *end = from + 16;
+  const unsigned char *end = from + len;
   unsigned char c1, c2, c3;
   char *d = to;
 
@@ -117,10 +171,18 @@ base64_16( const unsigned char *from, char *to ) {
       break;
     }
     c2 = *from++;
+    if ( from == end ) {
+      *d++ = base64[( ( c1 & 0x3 ) << 4 ) | ( ( c2 & 0xF0 ) >> 4 )];
+      *d++ = base64[( ( c2 & 0xF ) << 2 )];
+      break;
+    }
     c3 = *from++;
-    *d++ = base64[( ( c1 & 0x3 ) << 4 ) | ( ( c2 & 0xF0 ) >> 4 )];
-    *d++ = base64[( ( c2 & 0xF ) << 2 ) | ( ( c3 & 0xC0 ) >> 6 )];
-    *d++ = base64[c3 & 0x3F];
+    if ( from == end ) {
+      *d++ = base64[( ( c1 & 0x3 ) << 4 ) | ( ( c2 & 0xF0 ) >> 4 )];
+      *d++ = base64[( ( c2 & 0xF ) << 2 ) | ( ( c3 & 0xC0 ) >> 6 )];
+      *d++ = base64[c3 & 0x3F];
+      break;
+    }
   }
   *d = '\0';
   return to;
@@ -131,27 +193,29 @@ base64_16( const unsigned char *from, char *to ) {
 #define F_HEX 1
 #define F_B64 2
 
+#define HASH_MAX 512
+
 static SV *
-make_mortal_sv( pTHX_ const unsigned char *src, int type ) {
+make_mortal_sv( pTHX_ const unsigned char *src, STRLEN inlen, int type ) {
   STRLEN len;
-  char result[33];
+  char result[HASH_MAX / 4 + 1];
   char *ret;
 
   switch ( type ) {
   case F_BIN:
+    len = inlen;
     ret = ( char * ) src;
-    len = 16;
     break;
   case F_HEX:
-    ret = hex_16( src, result );
-    len = 32;
+    ret = hex_16( src, result, inlen );
+    len = inlen * 2;
     break;
   case F_B64:
-    ret = base64_16( src, result );
-    len = 22;
+    ret = base64_16( src, result, inlen );
+    len = ( int ) ( ( inlen * 8 + 7 ) / 6 );
     break;
   default:
-    croak( "Bad convertion type (%d)", type );
+    croak( "Bad conversion type (%d)", type );
     break;
   }
   return sv_2mortal( newSVpv( ret, len ) );
@@ -168,11 +232,12 @@ MODULE = Digest::MD6		PACKAGE = Digest::MD6
 PROTOTYPES: DISABLE
 
 void
-new(xclass)
+new(xclass, ...)
 	SV* xclass
   PREINIT:
     md6_state* context;
   PPCODE:
+    int digest_len = (int) SvIV(get_sv("Digest::MD6::HASH_LENGTH", FALSE));
     if (!SvROK(xclass)) {
       STRLEN my_na;
       char *sclass = SvPV(xclass, my_na);
@@ -183,7 +248,9 @@ new(xclass)
     } else {
       context = get_md6_ctx(aTHX_ xclass);
     }
-    MD6Init(context);
+    if ( items > 1 )
+      digest_len = (int) SvIV(ST(1));
+    MD6Init(context, digest_len);
     XSRETURN(1);
 
 void
@@ -278,11 +345,11 @@ digest(context)
     Digest::MD6::hexdigest = F_HEX
     Digest::MD6::b64digest = F_B64
   PREINIT:
-    unsigned char digeststr[16];
+    unsigned char digeststr[32];
   PPCODE:
     MD6Final(digeststr, context);
-    MD6Init(context);  /* In case it is reused */
-    ST(0) = make_mortal_sv(aTHX_ digeststr, ix);
+    MD6Init(context, context->d);  /* In case it is reused */
+    ST(0) = make_mortal_sv(aTHX_ digeststr, context->d / 8, ix);
     XSRETURN(1);
 
 void
@@ -296,9 +363,12 @@ md6(...)
     int i;
     unsigned char *data;
     STRLEN len;
-    unsigned char digeststr[16];
+    unsigned char digeststr[32];
   PPCODE:
-    MD6Init(&ctx);
+    int digest_len = (int) SvIV(get_sv("Digest::MD6::HASH_LENGTH", FALSE));
+    fprintf(stderr, "# digest_len = %d\n", digest_len);
+    MD6Init(&ctx, digest_len);
+    fprintf(stderr, "# done init\n");
 
     if (DOWARN) {
       char *msg = 0;
@@ -323,17 +393,22 @@ md6(...)
         }
       }
       if (msg) {
-        const char *f = (ix == F_BIN) ? "md6" :
-                  (ix == F_HEX) ? "md6_hex" : "md6_base64";
+        const char *f = 
+            (ix == F_BIN) ? "md6" 
+          : (ix == F_HEX) ? "md6_hex" 
+          :                 "md6_base64";
         warn("&Digest::MD6::%s function %s", f, msg);
       }
     }
 
     for (i = 0; i < items; i++) {
       data = (unsigned char *)(SvPV(ST(i), len));
+      fprintf(stderr, "# sending %d bytes at %p\n", (int) len, data);
       MD6Update(&ctx, data, len);
     }
+    fprintf(stderr, "# finalising\n");
     MD6Final(digeststr, &ctx);
-    ST(0) = make_mortal_sv(aTHX_ digeststr, ix);
+    fprintf(stderr, "# %s\n", ctx.hexhashval);
+    ST(0) = make_mortal_sv(aTHX_ digeststr, ctx.d / 8, ix);
     XSRETURN(1);
 

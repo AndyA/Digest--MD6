@@ -1,9 +1,11 @@
 package Digest::MD6;
 
 use strict;
-use vars qw($VERSION @ISA @EXPORT_OK);
+use vars qw($VERSION @ISA @EXPORT_OK $HASH_LENGTH);
 
 $VERSION = '0.01';
+
+$HASH_LENGTH = 256;
 
 require Exporter;
 *import    = \&Exporter::import;

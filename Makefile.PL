@@ -35,9 +35,10 @@ WriteMakefile(
     'XSLoader'     => 0,
   },
   @extra,
-  DIR    => ['src'],
-  OBJECT => join( ' ', @obj ),
-  dist   => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
+  DIR      => ['src'],
+  OPTIMIZE => '-g',
+  OBJECT   => join( ' ', @obj ),
+  dist     => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
 );
 
 sub free_u32_alignment {
