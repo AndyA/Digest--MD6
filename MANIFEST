@@ -6,13 +6,16 @@ Makefile.PL
 MANIFEST
 MD6.pm
 MD6.xs
-md6sum
 META.yml
 README
 src/inttypes.h
 src/Makefile.PL
 src/md6.h
+src/md6_compress.c
+src/md6_mode.c
+src/md6_nist.c
 src/md6_nist.h
+src/md6sum.c
 src/README_Reference.txt
 src/stdint.h
 t/00.load.t
@@ -23,5 +26,4 @@ t/clone.t
 t/md6-aaa.t
 t/pod.t
 t/ref.t
-t/utf8.t
 typemap

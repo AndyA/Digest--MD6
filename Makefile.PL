@@ -1,6 +1,10 @@
 #!perl -w
 
+require 5.008;
+
 use strict;
+use warnings;
+
 use Config qw(%Config);
 use ExtUtils::MakeMaker;
 

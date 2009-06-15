@@ -31,11 +31,11 @@
 ^Digest-MD6-
 ^Session\.vim$
 ^reference/
-\.(bs|c|o)$
+^[^/]+\.(bs|c|o)$
 ^attic
 ^md5sum$
 
 # src
-/Makefile$
-/pm_to_blib$
-/.(bs|c|o)$
+^src/Makefile$
+^src/pm_to_blib$
+^src/.*\.(bs|o)$
