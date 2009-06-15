@@ -5,56 +5,63 @@ use Config qw(%Config);
 use ExtUtils::MakeMaker;
 
 my @extra;
-@extra = (DEFINE => "-DU32_ALIGNMENT_REQUIRED") unless free_u32_alignment();
+@extra = ( DEFINE => "-DU32_ALIGNMENT_REQUIRED" )
+ unless free_u32_alignment();
 
-if ($^O eq 'VMS') {
-    if (defined($Config{ccname})) {
-        if (grep(/VMS_VAX/, @INC) && ($Config{ccname} eq 'DEC')) {
-            # VAX compiler optimizer even as late as v6.4 gets stuck
-            push(@extra, OPTIMIZE => "/Optimize=(NODISJOINT)");
-        }
+if ( $^O eq 'VMS' ) {
+  if ( defined( $Config{ccname} ) ) {
+    if ( grep( /VMS_VAX/, @INC ) && ( $Config{ccname} eq 'DEC' ) ) {
+      # VAX compiler optimizer even as late as v6.4 gets stuck
+      push( @extra, OPTIMIZE => "/Optimize=(NODISJOINT)" );
     }
+  }
 }
 
-push(@extra, 'INSTALLDIRS'  => 'perl') if $] >= 5.008;
-push @extra, 'LICENSE' => 'perl' if eval($ExtUtils::MakeMaker::VERSION) >= "6.30";
+push( @extra, 'INSTALLDIRS' => 'perl' ) if $] >= 5.008;
+push @extra, 'LICENSE' => 'perl' if eval( $ExtUtils::MakeMaker::VERSION ) >= "6.30";
 
-WriteMakefile(
-    'NAME'	   => 'Digest::MD6',
-    'VERSION_FROM' => 'MD6.pm',
-    'PREREQ_PM'    => { 'File::Spec' => 0,
-			'Digest::base' => '1.00',
-			'XSLoader' => 0,
-		      },
-    @extra,
-    'dist'         => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
+my $oe = $Config{obj_ext};
+my @obj = map { $_ . $oe } qw(
+ MD6 src/*
 );
 
+WriteMakefile(
+  NAME         => 'Digest::MD6',
+  AUTHOR       => 'Andy Armstrong <andy@hexten.net>',
+  VERSION_FROM => 'MD6.pm',
+  PREREQ_PM    => {
+    'File::Spec'   => 0,
+    'Digest::base' => '1.00',
+    'XSLoader'     => 0,
+  },
+  @extra,
+  DIR    => ['src'],
+  OBJECT => join( ' ', @obj ),
+  dist   => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
+);
 
+sub free_u32_alignment {
+  $| = 1;
+  if ( exists $Config{d_u32align} ) {
+    print "Perl's config says that U32 access must ";
+    print "not " unless $Config{d_u32align};
+    print "be aligned.\n";
+    return !$Config{d_u32align};
+  }
 
-sub free_u32_alignment
-{
-    $|=1;
-    if (exists $Config{d_u32align}) {
-       print "Perl's config says that U32 access must ";
-       print "not " unless $Config{d_u32align};
-       print "be aligned.\n";
-       return !$Config{d_u32align};
-    }
-    
-    if ($^O eq 'VMS' || $^O eq 'MSWin32') {
-       print "Assumes that $^O implies free alignment for U32 access.\n";
-       return 1;
-    }
-    
-    if ($^O eq 'hpux' && $Config{osvers} < 11.0) {
-       print "Will not test for free alignment on older HP-UX.\n";
-       return 0;
-    }
-    
-    print "Testing alignment requirements for U32... ";
-    open(ALIGN_TEST, ">u32align.c") or die "$!";
-    print ALIGN_TEST <<'EOT'; close(ALIGN_TEST);
+  if ( $^O eq 'VMS' || $^O eq 'MSWin32' ) {
+    print "Assumes that $^O implies free alignment for U32 access.\n";
+    return 1;
+  }
+
+  if ( $^O eq 'hpux' && $Config{osvers} < 11.0 ) {
+    print "Will not test for free alignment on older HP-UX.\n";
+    return 0;
+  }
+
+  print "Testing alignment requirements for U32... ";
+  open( ALIGN_TEST, ">u32align.c" ) or die "$!";
+  print ALIGN_TEST <<'EOT'; close( ALIGN_TEST );
 /*--------------------------------------------------------------*/
 /*  This program allocates a buffer of U8 (char) and then tries */
 /*  to access it through a U32 pointer at every offset.  The    */
@@ -117,30 +124,32 @@ int main(int argc, char** argv, char** env)
 /*--------------------------------------------------------------*/
 EOT
 
-    my $cc_cmd = "$Config{cc} $Config{ccflags} -I$Config{archlibexp}/CORE";
-    my $exe = "u32align$Config{exe_ext}";
-    $cc_cmd .= " -o $exe";
-    my $rc;
-    $rc = system("$cc_cmd $Config{ldflags} u32align.c $Config{libs}");
-    if ($rc) {
-	print "Can't compile test program.  Will ensure alignment to play safe.\n\n";
-	unlink("u32align.c", $exe, "u32align$Config{obj_ext}");
-	return 0;
-    }
-
-    $rc = system("./$exe");
-    unlink("u32align.c", $exe, "u32align$Config{obj_ext}");
-
-    return 1 unless $rc;
-
-    if ($rc > 0x80) {
-	(my $cp = $rc) >>= 8;
-	print "Test program exit status was $cp\n";
-    }
-    if ($rc & 0x80) {
-	$rc &= ~0x80;
-	unlink("core") && print "Core dump deleted\n";
-    }
-    print "signal $rc\n" if $rc && $rc < 0x80;
+  my $cc_cmd
+   = "$Config{cc} $Config{ccflags} -I$Config{archlibexp}/CORE";
+  my $exe = "u32align$Config{exe_ext}";
+  $cc_cmd .= " -o $exe";
+  my $rc;
+  $rc = system( "$cc_cmd $Config{ldflags} u32align.c $Config{libs}" );
+  if ( $rc ) {
+    print
+     "Can't compile test program.  Will ensure alignment to play safe.\n\n";
+    unlink( "u32align.c", $exe, "u32align$Config{obj_ext}" );
     return 0;
+  }
+
+  $rc = system( "./$exe" );
+  unlink( "u32align.c", $exe, "u32align$Config{obj_ext}" );
+
+  return 1 unless $rc;
+
+  if ( $rc > 0x80 ) {
+    ( my $cp = $rc ) >>= 8;
+    print "Test program exit status was $cp\n";
+  }
+  if ( $rc & 0x80 ) {
+    $rc &= ~0x80;
+    unlink( "core" ) && print "Core dump deleted\n";
+  }
+  print "signal $rc\n" if $rc && $rc < 0x80;
+  return 0;
 }

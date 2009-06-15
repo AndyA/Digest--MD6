@@ -8,6 +8,11 @@ MD6.pm
 MD6.xs
 META.yml
 README
+src/inttypes.h
+src/md6.h
+src/md6_nist.h
+src/README_Reference.txt
+src/stdint.h
 t/00.load.t
 t/align.t
 t/badfile.t
@@ -15,7 +20,6 @@ t/bits.t
 t/clone.t
 t/files.t
 t/md6-aaa.t
-t/pod-coverage.t
 t/pod.t
 t/utf8.t
 typemap

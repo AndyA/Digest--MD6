@@ -3,42 +3,41 @@ package Digest::MD6;
 use strict;
 use vars qw($VERSION @ISA @EXPORT_OK);
 
-$VERSION = '2.39';
+$VERSION = '0.01';
 
 require Exporter;
-*import = \&Exporter::import;
+*import    = \&Exporter::import;
 @EXPORT_OK = qw(md6 md6_hex md6_base64);
 
 eval {
-    require Digest::base;
-    push(@ISA, 'Digest::base');
+  require Digest::base;
+  push( @ISA, 'Digest::base' );
 };
-if ($@) {
-    my $err = $@;
-    *add_bits = sub { die $err };
+if ( $@ ) {
+  my $err = $@;
+  *add_bits = sub { die $err };
 }
-
 
 eval {
-    require XSLoader;
-    XSLoader::load('Digest::MD6', $VERSION);
+  require XSLoader;
+  XSLoader::load( 'Digest::MD6', $VERSION );
 };
-if ($@) {
-    my $olderr = $@;
-    eval {
-	# Try to load the pure perl version
-	require Digest::Perl::MD6;
+if ( $@ ) {
+  my $olderr = $@;
+  eval {
+    # Try to load the pure perl version
+    require Digest::Perl::MD6;
 
-	Digest::Perl::MD6->import(qw(md6 md6_hex md6_base64));
-	push(@ISA, "Digest::Perl::MD6");  # make OO interface work
-    };
-    if ($@) {
-	# restore the original error
-	die $olderr;
-    }
+    Digest::Perl::MD6->import( qw(md6 md6_hex md6_base64) );
+    push( @ISA, "Digest::Perl::MD6" );    # make OO interface work
+  };
+  if ( $@ ) {
+    # restore the original error
+    die $olderr;
+  }
 }
 else {
-    *reset = \&new;
+  *reset = \&new;
 }
 
 1;
