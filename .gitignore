@@ -1,4 +1,7 @@
 *.bak
+*.bs
+*.c
+*.o
 *.tar.gz
 .*.swp
 .lwpcookies
