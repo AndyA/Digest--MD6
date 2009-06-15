@@ -32,6 +32,8 @@
 ^Session\.vim$
 ^reference/
 \.(bs|c|o)$
+^attic
+^md5sum$
 
 # src
 /Makefile$

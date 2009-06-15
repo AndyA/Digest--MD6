@@ -1,4 +1,3 @@
-require 5.009005;
 use strict;
 use warnings;
 use ExtUtils::MakeMaker;
@@ -10,7 +9,7 @@ my @obj = map { $_ . $oe } qw(
 );
 
 WriteMakefile(
-  NAME         => 'src',
+  NAME         => 'Digest::MD6/src',
   AUTHOR       => 'Andy Armstrong <andy@hexten.net>',
   VERSION_FROM => '../MD6.pm',
   OPTIMIZE     => '-g',
