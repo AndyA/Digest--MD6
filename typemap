@@ -2,4 +2,4 @@ MD6_CTX*	T_MD6_CTX
 
 INPUT
 T_MD6_CTX
-	$var = get_md5_ctx(aTHX_ $arg)
+	$var = get_md6_ctx(aTHX_ $arg)
