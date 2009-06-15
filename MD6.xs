@@ -111,11 +111,10 @@ md6_croak( int error ) {
 static void
 MD6Init( md6_state * ctx, int d ) {
   md6_croak( md6_init( ctx, d ) ); 
-  /*md6_croak( md6_full_init( ctx, d, "", 0, 64, 5 ) );*/
 }
 
 static void
-MD6Update( md6_state * ctx, const U8 * buf, STRLEN len ) {
+MD6Update( md6_state * ctx, U8 * buf, STRLEN len ) {
   md6_croak( md6_update( ctx, buf, len * 8 ) );
 }
 

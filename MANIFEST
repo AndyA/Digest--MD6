@@ -9,6 +9,7 @@ MD6.xs
 META.yml
 README
 src/inttypes.h
+src/Makefile.PL
 src/md6.h
 src/md6_nist.h
 src/README_Reference.txt
@@ -21,5 +22,6 @@ t/clone.t
 t/files.t
 t/md6-aaa.t
 t/pod.t
+t/ref.t
 t/utf8.t
 typemap

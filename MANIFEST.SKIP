@@ -32,3 +32,8 @@
 ^Session\.vim$
 ^reference/
 \.(bs|c|o)$
+
+# src
+/Makefile$
+/pm_to_blib$
+/.(bs|c|o)$
