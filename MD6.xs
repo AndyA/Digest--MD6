@@ -366,9 +366,7 @@ md6(...)
     unsigned char digeststr[32];
   PPCODE:
     int digest_len = (int) SvIV(get_sv("Digest::MD6::HASH_LENGTH", FALSE));
-    fprintf(stderr, "# digest_len = %d\n", digest_len);
     MD6Init(&ctx, digest_len);
-    fprintf(stderr, "# done init\n");
 
     if (DOWARN) {
       char *msg = 0;
@@ -403,12 +401,9 @@ md6(...)
 
     for (i = 0; i < items; i++) {
       data = (unsigned char *)(SvPV(ST(i), len));
-      fprintf(stderr, "# sending %d bytes at %p\n", (int) len, data);
       MD6Update(&ctx, data, len);
     }
-    fprintf(stderr, "# finalising\n");
     MD6Final(digeststr, &ctx);
-    fprintf(stderr, "# %s\n", ctx.hexhashval);
     ST(0) = make_mortal_sv(aTHX_ digeststr, ctx.d / 8, ix);
     XSRETURN(1);
 
