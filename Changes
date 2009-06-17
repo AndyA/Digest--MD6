@@ -20,3 +20,7 @@ Revision history for Digest-MD6
         - Recode base64, hex encoding routines to handle arbitrary
           bit counts
 
+0.07    2009-06-17
+        - Documentation fixes
+        - Test coverage for 1, 2, 4 bit hashes
+        - Disable -g optimisation
