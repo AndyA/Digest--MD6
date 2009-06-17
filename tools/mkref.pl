@@ -8,7 +8,7 @@ use MIME::Base64;
 
 use constant MD6SUM => 'tools/md6sum';
 
-my @length = ( 224, 384, ( map { 2**$_ } 3 .. 9 ) );
+my @length = ( 224, 384, ( map { 2**$_ } 0 .. 9 ) );
 my @message = ( 'abc', '', 'a', '0' );
 
 my @cases = ();
@@ -17,6 +17,8 @@ for my $l ( @length ) {
   for my $m ( @message ) {
     my $hex = md6sum( $l, $m );
     ( my $b64 = encode_base64( pack( 'H*', $hex ), '' ) ) =~ s/=+$//;
+    my $expect = ( $l + 5 ) / 6;
+    $b64 = substr( $b64, 0, $expect );
     push @cases,
      {
       hl      => $l,
@@ -27,8 +29,15 @@ for my $l ( @length ) {
   }
 }
 
-print Data::Dumper->new( [ \@cases ], [qw($cases)] )->Useqq( 1 )
+my $ref = Data::Dumper->new( [ \@cases ], [qw($cases)] )->Useqq( 1 )
  ->Purity( 1 )->Terse( 1 )->Dump;
+$ref =~ s/"/'/g;
+$ref =~ s/'(\w+)'\s+=>/$1 =>/g;
+1 while $ref =~ s/^([^']+)'([^']{50,50})([^']+)'/$1'$2'\n.'$3'/msg;
+my @lines = split /\n/, $ref;
+shift @lines;
+pop @lines;
+print join "\n", 'my @cases = (', @lines, ');';
 
 sub md6sum {
   my ( $d, $M ) = @_;

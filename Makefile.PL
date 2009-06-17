@@ -40,7 +40,7 @@ WriteMakefile(
   },
   @extra,
   DIR      => ['src'],
-  OPTIMIZE => '-g',
+#  OPTIMIZE => '-g',
   OBJECT   => join( ' ', @obj ),
   dist     => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
 );

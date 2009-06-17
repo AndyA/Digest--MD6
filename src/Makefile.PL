@@ -12,13 +12,13 @@ WriteMakefile(
   NAME         => 'Digest::MD6/src',
   AUTHOR       => 'Andy Armstrong <andy@hexten.net>',
   VERSION_FROM => '../MD6.pm',
-  OPTIMIZE     => '-g',
-  #  DEFINE       => '-DHAVE_CONFIG_H',
+  #  OPTIMIZE     => '-g',
   clean => { FILES => "*.o *.lo *$oe" },
   OBJECT => join( ' ', @obj ),
   PM     => {},
   XS     => {},
-  linkext => { LINKTYPE => 'static' } );
+  linkext => { LINKTYPE => 'static' }
+);
 
 sub MY::static {
   return entab( <<'EOM');
