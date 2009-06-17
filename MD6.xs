@@ -129,7 +129,6 @@ get_md6_ctx( pTHX_ SV * sv ) {
     sv = SvRV( sv );
     if ( SvIOK( sv ) ) {
       md6_state *ctx = INT2PTR( md6_state *, SvIV( sv ) );
-      /* check signature */
       if ( ctx && ctx->sig == MD6_SIG ) {
         return ctx;
       }
