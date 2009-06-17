@@ -5,7 +5,6 @@ use warnings;
 
 use Test::More;
 use Digest::MD6 qw( md6 md6_hex md6_base64 );
-use Data::Hexdumper;
 
 my $have_base64 = eval { require MIME::Base64 };
 
