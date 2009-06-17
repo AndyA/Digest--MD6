@@ -1,0 +1,1 @@
+perl-reversion README MD6.pm --set $NEW_VERSION
