@@ -138,48 +138,59 @@ get_md6_ctx( pTHX_ SV * sv ) {
   return ( md6_state * ) 0;     /* some compilers insist on a return value */
 }
 
-static char *
-hex_16( const unsigned char *from, char *to, STRLEN len ) {
-  static const char hexdigits[] = "0123456789abcdef";
-  const unsigned char *end = from + len;
-  char *d = to;
-
-  while ( from < end ) {
-    *d++ = hexdigits[( *from >> 4 )];
-    *d++ = hexdigits[( *from & 0x0F )];
-    from++;
+static const char *
+enc_hex( char *buf, const unsigned char *in, int bits ) {
+  static const char hx[] = "0123456789abcdef";
+  char *op = buf;
+  unsigned p = 0;
+  while ( bits > 0 ) {
+    unsigned b = ( p & 1 ) ? ( in[p >> 1] & 0x0F ) : ( in[p >> 1] >> 4 );
+    if ( bits < 4 )
+      b &= ( ( 1 << bits ) - 1 ) << ( 4 - bits );
+    bits -= 4;
+    p++;
+    *op++ = hx[b];
   }
-  *d = '\0';
-  return to;
+  *op = '\0';
+  return buf;
 }
 
-static char *
-base64_16( const unsigned char *from, char *to, STRLEN len ) {
-  static const char base64[] =
+static const char *
+enc_base64( char *buf, const unsigned char *in, int bits ) {
+  static const char b64[] =
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-  const unsigned char *end = from + len;
-  unsigned char c1, c2, c3;
-  char *d = to;
 
-  while ( from != end ) {
-    c1 = *from++;
-    *d++ = base64[c1 >> 2];
-    if ( from == end ) {
-      *d++ = base64[( c1 & 0x3 ) << 4];
+  unsigned phase = 0;
+  unsigned p = 0;
+  char *op = buf;
+  while ( bits > 0 ) {
+    unsigned b = 0;
+    /* get next six bits */
+    switch ( phase ) {
+    case 0:
+      b = in[p] >> 2;
+      break;
+    case 1:
+      b = ( ( in[p] & 0x03 ) << 4 ) | ( ( in[p + 1] & 0xF0 ) >> 4 );
+      break;
+    case 2:
+      b = ( ( in[p + 1] & 0x0F ) << 2 ) | ( ( in[p + 2] & 0xC0 ) >> 6 );
+      break;
+    case 3:
+      b = in[p + 2] & 0x3f;
       break;
     }
-    c2 = *from++;
-    *d++ = base64[( ( c1 & 0x3 ) << 4 ) | ( ( c2 & 0xF0 ) >> 4 )];
-    if ( from == end ) {
-      *d++ = base64[( ( c2 & 0xF ) << 2 )];
-      break;
+    if ( bits < 6 )
+      b &= ( ( 1 << bits ) - 1 ) << ( 6 - bits );
+    bits -= 6;
+    if ( ++phase == 4 ) {
+      phase = 0;
+      p += 3;
     }
-    c3 = *from++;
-    *d++ = base64[( ( c2 & 0xF ) << 2 ) | ( ( c3 & 0xC0 ) >> 6 )];
-    *d++ = base64[c3 & 0x3F];
+    *op++ = b64[b];
   }
-  *d = '\0';
-  return to;
+  *op = '\0';
+  return buf;
 }
 
 /* Formats */
@@ -191,22 +202,22 @@ base64_16( const unsigned char *from, char *to, STRLEN len ) {
 #define HASH_MAX_BYTES ( HASH_MAX_BITS / 8 )
 
 static SV *
-make_mortal_sv( pTHX_ const unsigned char *src, STRLEN inlen, int type ) {
+make_mortal_sv( pTHX_ const unsigned char *src, int bits, int type ) {
   STRLEN len;
   char result[HASH_MAX_BYTES * 2 + 1];
   char *ret;
 
   switch ( type ) {
   case F_BIN:
-    len = inlen;
+    len = ( bits + 7 ) / 8;
     ret = ( char * ) src;
     break;
   case F_HEX:
-    ret = hex_16( src, result, inlen );
-    len = inlen * 2;
+    ret = enc_hex( result, src, bits );
+    len = strlen( ret );
     break;
   case F_B64:
-    ret = base64_16( src, result, inlen );
+    ret = enc_base64( result, src, bits );
     len = strlen( ret );
     break;
   default:
@@ -344,7 +355,7 @@ digest(context)
   PPCODE:
     MD6Final(digeststr, context);
     MD6Init(context, context->d);  /* In case it is reused */
-    ST(0) = make_mortal_sv(aTHX_ digeststr, ( context->d+7 ) / 8, ix);
+    ST(0) = make_mortal_sv(aTHX_ digeststr,  context->d, ix);
     XSRETURN(1);
 
 void
@@ -399,6 +410,6 @@ md6(...)
       MD6Update(&ctx, data, len);
     }
     MD6Final(digeststr, &ctx);
-    ST(0) = make_mortal_sv(aTHX_ digeststr, (ctx.d + 7) / 8, ix);
+    ST(0) = make_mortal_sv(aTHX_ digeststr, ctx.d, ix);
     XSRETURN(1);
 

@@ -15,3 +15,8 @@ Revision history for Digest-MD6
 
 0.05    2009-06-17
         - Remove spurious use of Data::Hexdumper
+
+0.06    2009-06-17
+        - Recode base64, hex encoding routines to handle arbitrary
+          bit counts
+
