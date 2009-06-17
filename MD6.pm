@@ -273,17 +273,16 @@ Copyright (c) 2009, Andy Armstrong C<< <andy@hexten.net> >>.
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself. See L<perlartistic>.
 
-This library is free software; you can redistribute it and/or
-modify it under the same terms as Perl itself.
-
-Based on L<Digest::MD5> by Gisle Aas which carries this copyright notice:
+Based on L<Digest::MD5> by Gisle Aas which carries this copyright
+notice:
 
   Copyright 1998-2003 Gisle Aas.
   Copyright 1995-1996 Neil Winton.
   Copyright 1991-1992 RSA Data Security, Inc.
 
 The MD6 implementation used is 
-L<http://groups.csail.mit.edu/cis/md6/code/md6_c_code-2009-04-15.zip> which is
+L<http://groups.csail.mit.edu/cis/md6/code/md6_c_code-2009-04-15.zip> 
+which is
 
   Copyright (c) 2008 Ronald L. Rivest
 
