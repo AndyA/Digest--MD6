@@ -34,15 +34,15 @@ BEGIN {
     push @EXPORT_OK, "md6_${l}", "md6_${l}_hex", "md6_${l}_base64";
     *{"md6_${l}"} = sub {
       local $Digest::MD6::HASH_LENGTH = $l;
-      md6(@_);
+      md6( @_ );
     };
     *{"md6_${l}_hex"} = sub {
       local $Digest::MD6::HASH_LENGTH = $l;
-      md6_hex(@_);
+      md6_hex( @_ );
     };
     *{"md6_${l}_base64"} = sub {
       local $Digest::MD6::HASH_LENGTH = $l;
-      md6_base64(@_);
+      md6_base64( @_ );
     };
   }
 }
