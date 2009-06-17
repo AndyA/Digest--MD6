@@ -110,7 +110,7 @@ md6_croak( int error ) {
 
 static void
 MD6Init( md6_state * ctx, int d ) {
-  md6_croak( md6_init( ctx, d ) ); 
+  md6_croak( md6_init( ctx, d ) );
 }
 
 static void
@@ -169,16 +169,15 @@ base64_16( const unsigned char *from, char *to, STRLEN len ) {
       break;
     }
     c2 = *from++;
+    *d++ = base64[( ( c1 & 0x3 ) << 4 ) | ( ( c2 & 0xF0 ) >> 4 )];
     if ( from == end ) {
-      *d++ = base64[( ( c1 & 0x3 ) << 4 ) | ( ( c2 & 0xF0 ) >> 4 )];
       *d++ = base64[( ( c2 & 0xF ) << 2 )];
       break;
     }
     c3 = *from++;
+    *d++ = base64[( ( c2 & 0xF ) << 2 ) | ( ( c3 & 0xC0 ) >> 6 )];
+    *d++ = base64[c3 & 0x3F];
     if ( from == end ) {
-      *d++ = base64[( ( c1 & 0x3 ) << 4 ) | ( ( c2 & 0xF0 ) >> 4 )];
-      *d++ = base64[( ( c2 & 0xF ) << 2 ) | ( ( c3 & 0xC0 ) >> 6 )];
-      *d++ = base64[c3 & 0x3F];
       break;
     }
   }
