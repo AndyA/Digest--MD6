@@ -161,7 +161,7 @@ base64_16( const unsigned char *from, char *to, STRLEN len ) {
   unsigned char c1, c2, c3;
   char *d = to;
 
-  while ( 1 ) {
+  while ( from != end ) {
     c1 = *from++;
     *d++ = base64[c1 >> 2];
     if ( from == end ) {
@@ -177,9 +177,6 @@ base64_16( const unsigned char *from, char *to, STRLEN len ) {
     c3 = *from++;
     *d++ = base64[( ( c2 & 0xF ) << 2 ) | ( ( c3 & 0xC0 ) >> 6 )];
     *d++ = base64[c3 & 0x3F];
-    if ( from == end ) {
-      break;
-    }
   }
   *d = '\0';
   return to;
@@ -190,12 +187,13 @@ base64_16( const unsigned char *from, char *to, STRLEN len ) {
 #define F_HEX 1
 #define F_B64 2
 
-#define HASH_MAX 512
+#define HASH_MAX_BITS  512
+#define HASH_MAX_BYTES ( HASH_MAX_BITS / 8 )
 
 static SV *
 make_mortal_sv( pTHX_ const unsigned char *src, STRLEN inlen, int type ) {
   STRLEN len;
-  char result[HASH_MAX / 4 + 1];
+  char result[HASH_MAX_BYTES * 2 + 1];
   char *ret;
 
   switch ( type ) {
@@ -209,7 +207,7 @@ make_mortal_sv( pTHX_ const unsigned char *src, STRLEN inlen, int type ) {
     break;
   case F_B64:
     ret = base64_16( src, result, inlen );
-    len = ( int ) ( ( inlen * 8 + 7 ) / 6 );
+    len = strlen( ret );
     break;
   default:
     croak( "Bad conversion type (%d)", type );
@@ -342,11 +340,11 @@ digest(context)
     Digest::MD6::hexdigest = F_HEX
     Digest::MD6::b64digest = F_B64
   PREINIT:
-    unsigned char digeststr[32];
+    unsigned char digeststr[HASH_MAX_BYTES];
   PPCODE:
     MD6Final(digeststr, context);
     MD6Init(context, context->d);  /* In case it is reused */
-    ST(0) = make_mortal_sv(aTHX_ digeststr, context->d / 8, ix);
+    ST(0) = make_mortal_sv(aTHX_ digeststr, ( context->d+7 ) / 8, ix);
     XSRETURN(1);
 
 void
@@ -360,7 +358,7 @@ md6(...)
     int i;
     unsigned char *data;
     STRLEN len;
-    unsigned char digeststr[32];
+    unsigned char digeststr[HASH_MAX_BYTES];
   PPCODE:
     int digest_len = (int) SvIV(get_sv("Digest::MD6::HASH_LENGTH", FALSE));
     MD6Init(&ctx, digest_len);
@@ -401,6 +399,6 @@ md6(...)
       MD6Update(&ctx, data, len);
     }
     MD6Final(digeststr, &ctx);
-    ST(0) = make_mortal_sv(aTHX_ digeststr, ctx.d / 8, ix);
+    ST(0) = make_mortal_sv(aTHX_ digeststr, (ctx.d + 7) / 8, ix);
     XSRETURN(1);
 

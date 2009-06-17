@@ -33,7 +33,7 @@
 ^reference/
 ^[^/]+\.(bs|c|o)$
 ^attic
-^md5sum$
+^md6sum$
 
 # src
 ^src/Makefile$
