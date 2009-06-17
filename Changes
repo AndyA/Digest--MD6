@@ -9,3 +9,6 @@ Revision history for Digest-MD6
 0.03    2009-06-17
         - Fix Base64 encoding
         - Fix buffer overrun with hash > 256 bits
+
+0.04    2009-06-17
+        - Add convience aliases

@@ -33,6 +33,7 @@
 ^reference/
 ^[^/]+\.(bs|c|o)$
 ^attic
+^tools
 ^md6sum$
 
 # src

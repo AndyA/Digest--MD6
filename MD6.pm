@@ -21,11 +21,31 @@ This document describes Digest::MD6 version 0.03
 
 our $VERSION = '0.03';
 
-our @EXPORT_OK = qw( md6 md6_hex md6_base64 );
-
 our $HASH_LENGTH = 256;
 
 XSLoader::load( 'Digest::MD6', $VERSION );
+
+BEGIN {
+  our @EXPORT_OK = qw( md6 md6_hex md6_base64 );
+
+  my @len = ( 224, 256, 384, 512 );
+  for my $l ( @len ) {
+    no strict 'refs';
+    push @EXPORT_OK, "md6_${l}", "md6_${l}_hex", "md6_${l}_base64";
+    *{"md6_${l}"} = sub {
+      local $Digest::MD6::HASH_LENGTH = $l;
+      md6(@_);
+    };
+    *{"md6_${l}_hex"} = sub {
+      local $Digest::MD6::HASH_LENGTH = $l;
+      md6_hex(@_);
+    };
+    *{"md6_${l}_base64"} = sub {
+      local $Digest::MD6::HASH_LENGTH = $l;
+      md6_base64(@_);
+    };
+  }
+}
 
 1;
 __END__
@@ -58,8 +78,9 @@ __END__
 
 The C<Digest::MD6> module allows you to use the MD6 Message Digest
 algorithm from within Perl programs. The algorithm takes as input a
-message of arbitrary length and produces as output a "fingerprint" or
-"message digest" of the input.
+## Please see file perltidy.ERR
+message of arbitrary length and produces as output a " fingerprint " or
+" message digest " of the input.
 
 =head1 INTERFACE
 
@@ -80,11 +101,11 @@ before calling these functions:
 =head3 md6($data,...)
 
 This function will concatenate all arguments, calculate the MD6 digest
-of this "message", and return it in binary form.  The returned string
+of this " message ", and return it in binary form.  The returned string
 will be 16 bytes long.
 
-The result of md6("a", "b", "c") will be exactly the same as the
-result of md6("abc").
+The result of md6(" a ", " b ", " c ") will be exactly the same as the
+result of md6(" abc ").
 
 =head3 md6_hex($data,...)
 
@@ -103,6 +124,19 @@ Note that the base64 encoded string returned is not padded to be a
 multiple of 4 bytes long.  If you want interoperability with other
 base64 encoded md6 digests you might want to append enough '='
 characters to make the length a multiple of 4.
+
+=head2 Aliases
+
+As a shorthand for setting the hash length via
+C<$Digest::MD6::HASH_LENGTH> a number of exportable aliases are
+available:
+
+  md6_224 md6_224_base64 md6_224_hex
+  md6_256 md6_256_base64 md6_256_hex
+  md6_384 md6_384_base64 md6_384_hex
+  md6_512 md6_512_base64 md6_512_hex
+
+These set the hash length before encoding.
 
 =head1 METHODS
 
@@ -141,7 +175,7 @@ stream. Example:
   my $md6 = Digest::MD6->new;
   while (<>) {
     $md6->add($_);
-    print "Line $.: ", $md6->clone->hexdigest, "\n";
+    print " Line $.: ", $md6->clone->hexdigest, " \n ";
   }
 
 =head3 $md6->add($data,...)
@@ -152,10 +186,10 @@ calculate the digest for.  The return value is the $md6 object itself.
 All these lines will have the same effect on the state of the $md6
 object:
 
-  $md6->add("a"); $md6->add("b"); $md6->add("c");
-  $md6->add("a")->add("b")->add("c");
-  $md6->add("a", "b", "c");
-  $md6->add("abc");
+  $md6->add(" a "); $md6->add(" b "); $md6->add(" c ");
+  $md6->add(" a ")->add(" b ")->add(" c ");
+  $md6->add(" a ", " b ", " c ");
+  $md6->add(" abc ");
 
 =head3 $md6->addfile($io_handle)
 
@@ -208,7 +242,7 @@ and '/'.
 
 The base64 encoded string returned is not padded to be a multiple of 4
 bytes long.  If you want interoperability with other base64 encoded
-md6 digests you might want to append the string "==" to the result.
+md6 digests you might want to append the string " == " to the result.
 
 L<Digest>,
 L<Digest::MD2>,

@@ -6,7 +6,6 @@ Makefile.PL
 MANIFEST
 MD6.pm
 MD6.xs
-META.yml
 README
 src/inttypes.h
 src/Makefile.PL
@@ -19,6 +18,7 @@ src/md6sum.c
 src/README_Reference.txt
 src/stdint.h
 t/00.load.t
+t/alias.t
 t/align.t
 t/badfile.t
 t/bits.t
