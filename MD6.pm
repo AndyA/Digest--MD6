@@ -78,9 +78,8 @@ __END__
 
 The C<Digest::MD6> module allows you to use the MD6 Message Digest
 algorithm from within Perl programs. The algorithm takes as input a
-## Please see file perltidy.ERR
-message of arbitrary length and produces as output a " fingerprint " or
-" message digest " of the input.
+message of arbitrary length and produces as output a "fingerprint" or
+"message digest" of the input.
 
 =head1 INTERFACE
 
@@ -136,7 +135,16 @@ available:
   md6_384 md6_384_base64 md6_384_hex
   md6_512 md6_512_base64 md6_512_hex
 
-These set the hash length before encoding.
+These set the hash length before encoding, so instead of writing:
+
+  {
+    local $Digest::MD6::HASH_LENGTH = 512;
+    my $hash = md6_hex( $data );
+  }
+
+you can just:
+
+  my $hash = md6_512_hex( $data );
 
 =head1 METHODS
 
