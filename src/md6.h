@@ -209,12 +209,15 @@ int md6_standard_compress(
     ** 1-origin indexing, since st->N[0] is now unused.)
     */
 
+#define MD6_SIG 0xa5be5705
+
 /* MD6 state.
 ** 
 ** md6_state is the main data structure for the MD6 hash function.
 */
 
 typedef struct {
+  unsigned long sig;
 
   int d;           /* desired hash bit length. 1 <= d <= 512.      */
   int hashbitlen;  /* hashbitlen is the same as d; for NIST API    */
