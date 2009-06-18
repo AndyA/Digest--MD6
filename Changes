@@ -24,3 +24,6 @@ Revision history for Digest-MD6
         - Documentation fixes
         - Test coverage for 1, 2, 4 bit hashes
         - Disable -g optimisation
+
+0.08    2009-06-18
+        - Override Digest::base::reset so that it preserves hash size.
