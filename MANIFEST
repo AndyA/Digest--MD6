@@ -26,4 +26,5 @@ t/clone.t
 t/md6-aaa.t
 t/pod.t
 t/ref.t
+t/reset.t
 typemap

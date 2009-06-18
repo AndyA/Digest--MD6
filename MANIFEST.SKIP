@@ -35,6 +35,7 @@
 ^attic
 ^tools
 ^md6sum$
+^\.bump$
 
 # src
 ^src/Makefile$
