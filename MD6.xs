@@ -138,7 +138,7 @@ get_md6_ctx( pTHX_ SV * sv ) {
   return ( md6_state * ) 0;     /* some compilers insist on a return value */
 }
 
-static const char *
+static char *
 enc_hex( char *buf, const unsigned char *in, int bits ) {
   static const char hx[] = "0123456789abcdef";
   char *op = buf;
@@ -155,7 +155,7 @@ enc_hex( char *buf, const unsigned char *in, int bits ) {
   return buf;
 }
 
-static const char *
+static char *
 enc_base64( char *buf, const unsigned char *in, int bits ) {
   static const char b64[] =
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -279,6 +279,15 @@ DESTROY(context)
 	md6_state* context
   CODE:
     Safefree(context);
+
+void
+reset(self)
+	SV* self
+  PREINIT:
+    md6_state* context = get_md6_ctx(aTHX_ self);
+  PPCODE:
+    MD6Init(context, context->d);
+    XSRETURN(1);  /* self */
 
 void
 add(self, ...)
