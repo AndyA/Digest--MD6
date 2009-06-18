@@ -1,6 +1,6 @@
 *.bak
 *.bs
-*.c
+MD6.c
 *.o
 *.tar.gz
 .*.swp
