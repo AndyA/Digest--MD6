@@ -1,3 +1,4 @@
+inc/Devel/CheckLib.pm
 Changes
 hints/dec_osf.pl
 hints/irix_6.pl

@@ -27,3 +27,8 @@ Revision history for Digest-MD6
 
 0.08    2009-06-18
         - Override Digest::base::reset so that it preserves hash size.
+
+0.09    2009-06-24
+        - Use Devel::CheckLib (DrHyde++) to test for availability
+          of compiler.
+

@@ -7,6 +7,10 @@ use warnings;
 
 use Config qw(%Config);
 use ExtUtils::MakeMaker;
+use Devel::CheckLib;
+
+# Check that we have a C compiler
+check_lib_or_exit();
 
 my @extra = ();
 if ( $^O eq 'VMS' ) {
