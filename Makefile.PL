@@ -4,6 +4,7 @@ require 5.008;
 
 use strict;
 use warnings;
+use lib qw( inc );
 
 use Config qw(%Config);
 use ExtUtils::MakeMaker;
