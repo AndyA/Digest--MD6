@@ -16,11 +16,11 @@ Digest::MD6 - Perl interface to the MD6 Algorithm
 
 =head1 VERSION
 
-This document describes Digest::MD6 version 0.10
+This document describes Digest::MD6 version 0.12
 
 =cut
 
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 
 our $HASH_LENGTH = 256;
 
@@ -284,7 +284,7 @@ Andy Armstrong  C<< <andy@hexten.net> >>
 
 =head1 LICENCE AND COPYRIGHT
 
-Copyright (c) 2009, Andy Armstrong C<< <andy@hexten.net> >>.
+Copyright (c) 2009-2010, Andy Armstrong C<< <andy@hexten.net> >>.
 
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself. See L<perlartistic>.

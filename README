@@ -1,4 +1,4 @@
-Version 0.11 of Digest::MD6
+Version 0.12 of Digest::MD6
 
 INSTALLATION
 
@@ -11,7 +11,7 @@ To install this module, run the following commands:
 
 COPYRIGHT AND LICENCE
 
-Copyright (C) 2009, Andy Armstrong
+Copyright (C) 2009-2010, Andy Armstrong
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
