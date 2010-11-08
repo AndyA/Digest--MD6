@@ -114,8 +114,13 @@ MD6Init( md6_state * ctx, int d ) {
 }
 
 static void
+MD6UpdateBits( md6_state * ctx, U8 * buf, STRLEN len ) {
+  md6_croak( md6_update( ctx, buf, len ) );
+}
+
+static void
 MD6Update( md6_state * ctx, U8 * buf, STRLEN len ) {
-  md6_croak( md6_update( ctx, buf, len * 8 ) );
+  MD6UpdateBits( ctx, buf, len * 8 );
 }
 
 static void
@@ -301,6 +306,29 @@ add(self, ...)
     for (i = 1; i < items; i++) {
       data = (unsigned char *)(SvPV(ST(i), len));
       MD6Update(context, data, len);
+    }
+    XSRETURN(1);  /* self */
+
+void
+_add_bits(self, ...)
+	SV* self
+  PREINIT:
+    md6_state* context = get_md6_ctx(aTHX_ self);
+    int i;
+    unsigned char *data;
+    STRLEN len;
+    IV bits;
+  PPCODE:
+    if (!(items & 1)) {
+      croak("add_bits expects a number of data, length pairs");
+    }
+    for (i = 1; i < items; i += 2) {
+      data = (unsigned char *)(SvPV(ST(i), len));
+      bits = SvIV(ST(i+1));
+      if ( bits > len * 8 ) {
+        croak("not enough bits in data");
+      }
+      MD6UpdateBits(context, data, bits);
     }
     XSRETURN(1);  /* self */
 

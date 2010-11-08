@@ -5,6 +5,7 @@ require 5.008;
 use strict;
 use warnings;
 
+use Carp qw( croak );
 use XSLoader;
 
 use base qw( Exporter Digest::base );
@@ -44,6 +45,21 @@ BEGIN {
       local $Digest::MD6::HASH_LENGTH = $l;
       md6_base64( @_ );
     };
+  }
+}
+
+sub add_bits {
+  my $self = shift;
+  my $bits;
+  my $nbits;
+  if ( @_ == 1 ) {
+    my $arg = shift;
+    return $self->_add_bits( pack( "B*", $arg ), length $arg );
+  }
+  else {
+    ( $bits, $nbits ) = @_;
+    return $self->_add_bits(
+      substr( $bits, 0, int( ( $nbits + 7 ) / 8 ) ), $nbits );
   }
 }
 
