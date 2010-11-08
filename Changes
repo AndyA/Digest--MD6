@@ -39,3 +39,4 @@ Revision history for Digest-MD6
         - Make it possible to supply bit strings that are not a multiple
           of eight bits to add_bits.
         - Add test against published reference data.
+        - Avoid non-portable use of wildcards in Makefile.

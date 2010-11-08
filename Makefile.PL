@@ -8,6 +8,7 @@ use lib qw( inc );
 
 use Config qw(%Config);
 use ExtUtils::MakeMaker;
+use File::Spec;
 use Devel::CheckLib;
 
 # Check that we have a C compiler
@@ -29,9 +30,7 @@ push @extra, 'LICENSE' => 'perl'
  if eval( $ExtUtils::MakeMaker::VERSION ) >= "6.30";
 
 my $oe = $Config{obj_ext};
-my @obj = map { $_ . $oe } qw(
- MD6 src/*
-);
+my @obj = ( "MD6$oe", make_obj_list( 'src', $oe, 'md6sum.c' ) );
 
 WriteMakefile(
   NAME         => 'Digest::MD6',
@@ -44,8 +43,19 @@ WriteMakefile(
     'XSLoader'     => 0,
   },
   @extra,
-  DIR      => ['src'],
-#  OPTIMIZE => '-g',
-  OBJECT   => join( ' ', @obj ),
-  dist     => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
+  DIR => ['src'],
+  #  OPTIMIZE => '-g',
+  OBJECT => join( ' ', @obj ),
+  dist => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
 );
+
+sub make_obj_list {
+  my ( $dir, $ext, @exc ) = @_;
+  my $exc = join '|', map { "(?:\Q$_\E)" } @exc;
+  opendir my $dh, $dir or die "Can't read $dir: $!\n";
+  return map { File::Spec->catfile( $dir, $_ ) }
+   map { $_ =~ s/\.c$/$ext/ && $_ }
+   grep { /\.c$/i }
+   grep { !/^$exc$/ }
+   grep { !/^\./ } readdir $dh;
+}
