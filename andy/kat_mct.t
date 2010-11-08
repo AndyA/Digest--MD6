@@ -3,13 +3,17 @@
 use strict;
 use warnings;
 
+use Digest::MD6;
 use File::Spec;
 use LWP::Simple qw( mirror is_success status_message $ua );
 
-#use Test::More tests => 1;
+use Test::More;
+
+plan skip_all => 'Set DIGEST_MD6_SLOW_TESTS to enable'
+ unless $ENV{DIGEST_MD6_SLOW_TESTS};
 
 use constant BASE =>
- 'http://groups.csail.mit.edu/cis/md6/revision-2009-1-15/KAT_MCT/';
+ 'http://groups.csail.mit.edu/cis/md6/revision-2009-04-15/KAT_MCT/';
 use constant CACHE => 'kat_mct';
 
 -d CACHE or mkdir CACHE or die "Can't create ", CACHE, ": $!\n";
@@ -24,18 +28,33 @@ for my $name ( 'ExtremelyLongMsgKAT', 'LongMsgKAT', 'ShortMsgKAT' ) {
   }
 }
 
+done_testing();
+
 sub test {
   my $case = shift;
-  local $Digest::MD6::HASH_LENGTH = $case->{bits};
+  local $Digest::MD6::HASH_LENGTH = $case->{_bits};
   my $md = Digest::MD6->new;
-
+  if ( exists $case->{Len} && exists $case->{Msg} ) {
+    $md->add_bits( pack( 'H*', $case->{Msg} ), $case->{Len} );
+  }
+  elsif ( exists $case->{Repeat} && exists $case->{Text} ) {
+    return;
+    $md->add( $case->{Text} ) for 1 .. $case->{Repeat};
+  }
+  else {
+    die sprintf "%s, line %d: Unrecognised test case\n",
+     $case->{_file}, $case->{_line};
+  }
+  is lc $md->hexdigest, lc $case->{MD},
+   sprintf "%s, line %d: hash matches", $case->{_file}, $case->{_line};
 }
 
 sub fetch {
   my ( $base, $name ) = @_;
-  my $url  = "${base}/${name}";
+  my $url = "${base}/${name}";
   my $file = File::Spec->catfile( CACHE, $name );
-  my $rc   = mirror( $url, $file );
+  diag "Fetching $url as $file";
+  my $rc = mirror( $url, $file );
   die status_message( $rc )
    unless is_success( $rc ) || $rc == 304;
   return $file;
