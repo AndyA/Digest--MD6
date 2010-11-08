@@ -1,6 +1,5 @@
 *.bak
 *.bs
-MD6.c
 *.o
 *.tar.gz
 .*.swp
@@ -8,13 +7,14 @@ MD6.c
 .prove
 Build
 Digest-MD6-*
+MD6.c
 Makefile
 Makefile.old
 Session.vim
 _build*
-andy
 blib*
 cover_db
+kat_mct
+md6sum
 pm_to_blib*
 reference
-md6sum
