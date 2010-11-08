@@ -13,7 +13,7 @@ plan skip_all => 'Set DIGEST_MD6_SLOW_TESTS to enable'
  unless $ENV{DIGEST_MD6_SLOW_TESTS};
 
 use constant BASE =>
- 'http://groups.csail.mit.edu/cis/md6/revision-2009-04-15/KAT_MCT/';
+ 'http://groups.csail.mit.edu/cis/md6/revision-2009-04-15/KAT_MCT';
 use constant CACHE => 'kat_mct';
 
 -d CACHE or mkdir CACHE or die "Can't create ", CACHE, ": $!\n";
