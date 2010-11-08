@@ -13,6 +13,7 @@
 ^ref/
 ^incoming/
 ^t/disabled/
+^kat_mct/
 ^blib/
 ^pm_to_blib$
 ^_build/
@@ -40,4 +41,5 @@
 # src
 ^src/Makefile$
 ^src/pm_to_blib$
+^src/md6sum$
 ^src/.*\.(bs|o)$
