@@ -20,7 +20,7 @@ This document describes Digest::MD6 version 0.10
 
 =cut
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 our $HASH_LENGTH = 256;
 
