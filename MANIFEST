@@ -1,8 +1,8 @@
-inc/Devel/CheckLib.pm
 Changes
 hints/dec_osf.pl
 hints/irix_6.pl
 hints/MacOS.pl
+inc/Devel/CheckLib.pm
 Makefile.PL
 MANIFEST
 MD6.pm
@@ -24,6 +24,7 @@ t/align.t
 t/badfile.t
 t/bits.t
 t/clone.t
+t/kat_mct.t
 t/md6-aaa.t
 t/pod.t
 t/ref.t

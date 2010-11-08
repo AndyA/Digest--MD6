@@ -38,7 +38,6 @@ sub test {
     $md->add_bits( pack( 'H*', $case->{Msg} ), $case->{Len} );
   }
   elsif ( exists $case->{Repeat} && exists $case->{Text} ) {
-    return;
     $md->add( $case->{Text} ) for 1 .. $case->{Repeat};
   }
   else {
