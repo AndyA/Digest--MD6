@@ -39,6 +39,7 @@ WriteMakefile(
   PREREQ_PM    => {
     'Digest::base' => '1.00',
     'File::Spec'   => 0,
+    'LWP::Simple'  => 0,
     'Test::More'   => 0,
     'XSLoader'     => 0,
   },
