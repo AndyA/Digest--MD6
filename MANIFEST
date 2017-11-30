@@ -9,7 +9,6 @@ MD6.pm
 MD6.xs
 README
 src/inttypes.h
-src/Makefile.PL
 src/md6.h
 src/md6_compress.c
 src/md6_mode.c
