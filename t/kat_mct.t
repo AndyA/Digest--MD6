@@ -5,9 +5,10 @@ use warnings;
 
 use Digest::MD6;
 use File::Spec;
-use LWP::Simple qw( mirror is_success status_message $ua );
-
 use Test::More;
+
+eval 'use LWP::Simple qw( mirror is_success status_message $ua )';
+plan skip_all => "LWP::Simple required for testing" if $@;
 
 plan skip_all => 'Set DIGEST_MD6_SLOW_TESTS to enable'
  unless $ENV{DIGEST_MD6_SLOW_TESTS};
